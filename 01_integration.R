@@ -266,14 +266,17 @@ integ_rna[["adt.pca"]]       <- integ_adt[["adt.pca"]]
 DefaultAssay(integ_rna) <- "integrated"
 integ_rna <- RunPCA(integ_rna, verbose = FALSE)
 
+# WNN dimensions are fixed to match the original analysis (RNA 1:22, ADT 1:18).
+# pc_cutoff() is retained below for reference/diagnostics only.
 rna_pcs <- pc_cutoff(integ_rna[["pca"]]@stdev)
 adt_pcs <- pc_cutoff(integ_rna[["adt.pca"]]@stdev)
-message("RNA PCs used: ", rna_pcs, "  |  ADT PCs used: ", adt_pcs)
+message("pc_cutoff suggests — RNA PCs: ", rna_pcs, "  |  ADT PCs: ", adt_pcs,
+        "  (using fixed 1:22 / 1:18)")
 
 integ_rna <- FindMultiModalNeighbors(
   integ_rna,
   reduction.list = list("pca", "adt.pca"),
-  dims.list      = list(seq_len(rna_pcs), seq_len(adt_pcs))
+  dims.list      = list(1:22, 1:18)
 )
 integ_rna <- FindClusters(integ_rna, graph.name = "wsnn", resolution = WNN_RES_GLOBAL)
 integ_rna <- RunUMAP(integ_rna, nn.name = "weighted.nn",
